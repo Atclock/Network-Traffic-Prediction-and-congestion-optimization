@@ -1,0 +1,101 @@
+Show Dept A traffic:
+plt.plot(time_hours, deptA_traffic, marker='o')
+plt.xlabel("Time")
+plt.ylabel("Traffic (Mbps)")
+plt.title("Department A Traffic")
+
+plt.grid(True)
+plt.show()
+
+Show Dept A traffic compared to expected values
+from traffic_data import *
+from interpolation import newton_interpolation
+from congestion import detect_congestion
+from optimizer import *
+import matplotlib.pyplot as plt
+
+predicted = newton_interpolation(time_hours, deptA_traffic, 15)
+
+print(f"Predicted Dept A traffic at 15:00 = {predicted:.2f} Mbps")
+
+status = detect_congestion(predicted)
+
+print(status)
+
+optimal_bandwidth = newton_raphson(10)
+
+print(f"Optimal bandwidth = {optimal_bandwidth:.2f} Mbps")
+
+future_time = 15
+plt.figure(figsize=(10, 6))
+
+plt.plot(time_hours, deptA_traffic, marker='o', label='Actual Traffic')
+
+plt.scatter(future_time, predicted, s=120, label='Predicted Traffic')
+
+plt.xlabel('Time (Hours)')
+plt.ylabel('Traffic (Mbps)')
+plt.title('Department A Traffic Prediction')
+
+plt.legend()
+plt.grid()
+plt.show()
+
+Show full comparison between all 3 departments
+plt.figure(figsize=(10, 6))
+
+plt.plot(time_hours, deptA_traffic, marker='o', label='Dept A Traffic')
+
+plt.plot(time_hours, deptB_traffic, marker='s', label='Dept B Traffic')
+
+plt.plot(time_hours, deptC_traffic, marker='^', label='Dept C Traffic')
+
+plt.xlabel('Time (Hours)')
+plt.ylabel('Traffic (Mbps)')
+plt.title('Network Traffic Comparison Between Departments')
+
+plt.legend()
+plt.grid()
+plt.show()
+
+
+Old optimizer code 
+def delay_function(x):
+    return (100 / x) + 0.5 * x
+
+def delay_derivative(x):
+    return -100 / (x ** 2) + 0.5
+
+def delay_second_derivative(x):
+    return (200 / (x**3))
+
+def newton_raphson(initial_guess, tolerance = 1e-6, max_iter = 100):
+    x = initial_guess
+
+    for i in range(max_iter):
+        x_new = x - (delay_derivative(x) / delay_second_derivative(x))
+
+        if abs(x_new - x) < tolerance:
+            return x_new
+        
+        x = x_new
+
+        return x
+
+        Static data for testing
+        time_hours = [8,9,10,11,12,13,14]
+
+deptA_traffic = [20, 35, 50, 65, 80, 95, 110] #heavy usage
+deptB_traffic = [15, 20, 30, 40, 45, 50, 60]  #Stable usage
+deptC_traffic = [10, 25, 20, 35, 30, 45, 40]  #Random usage
+
+Totally random data usage from all 3 departments
+import random
+
+def generate_live_traffic():
+
+    deptA = random.randint(40, 120)
+    deptB = random.randint(20, 70)
+    deptC = random.randint(10, 60)
+
+    return deptA, deptB, deptC
